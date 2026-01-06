@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Traversal Visualization - BFS & DFS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .canvas-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .canvas-container {
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 500px;
+            background: white;
+            cursor: crosshair;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group h3 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-group h3::before {
+            content: '⚙️';
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+        }
+
+        .btn-warning {
+            background: #ed8936;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #dd6b20;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(237, 137, 54, 0.4);
+        }
+
+        .btn-info {
+            background: #4299e1;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+        }
+
+        .btn-small {
+            padding: 8px;
+            font-size: 0.85em;
+            margin-bottom: 6px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+
+        .input-group button {
+            flex: 0 0 auto;
+            width: auto;
+            padding: 10px 15px;
+            margin-bottom: 0;
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-box {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-box h4 {
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .info-box p {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .status-box {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #48bb78;
+        }
+
+        .status-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .status-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .queue-stack {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .queue-stack h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .queue-item {
+            background: #f0f0f0;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .queue-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .traversal-list {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .traversal-list h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .traversal-item {
+            background: #f0f0f0;
+            padding: 6px 10px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            font-size: 0.85em;
+            color: #333;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .traversal-item.visited {
+            background: #48bb78;
+            color: white;
+        }
+
+        .legend {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+        }
+
+        .legend h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .legend-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #333;
+        }
+
+        .legend-circle.unvisited {
+            background: white;
+        }
+
+        .legend-circle.current {
+            background: #4299e1;
+        }
+
+        .legend-circle.visited {
+            background: #48bb78;
+        }
+
+        .code-section {
+            margin-top: 30px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+
+        .code-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .code-block.bfs {
+            display: none;
+        }
+
+        .code-block.dfs {
+            display: none;
+        }
+
+        .code-block.active {
+            display: block;
+        }
+
+        .algorithm-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .info-message {
+            background: #e6fffa;
+            border-left: 4px solid #38b2ac;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #234e52;
+        }
+
+        .warning-message {
+            background: #fffaf0;
+            border-left: 4px solid #ed8936;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #7c2d12;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .step-speed {
+            margin-bottom: 15px;
+        }
+
+        .step-speed label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .speed-slider {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .speed-value {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Graph Traversal Visualization</h1>
+            <p>Interactive BFS & DFS Animation with Step-by-Step Execution</p>
+        </div>
+
+        <div class="main-content">
+            <div class="canvas-section">
+                <div class="canvas-container">
+                    <canvas id="graphCanvas"></canvas>
+                </div>
+
+                <div class="controls">
+                    <div class="info-message">
+                        <strong>Instructions:</strong> Click on the canvas to add nodes. Then click on two nodes to create edges.
+                    </div>
+
+                    <div class="control-group">
+                        <h3>Graph Operations</h3>
+                        <button class="btn-primary btn-small" onclick="startAddingEdge()">✏️ Add Edge</button>
+                        <button class="btn-danger btn-small" onclick="clearGraph()">🗑️ Clear Graph</button>
+                        <button class="btn-warning btn-small" onclick="generateRandomGraph()">🎲 Random Graph</button>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>Traversal Speed</h3>
+                        <div class="step-speed">
+                            <input type="range" id="speedSlider" min="100" max="2000" value="800" step="100" class="speed-slider">
+                            <div class="speed-value">Speed: <span id="speedValue">800ms</span></div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>Start Traversal</h3>
+                        <div class="input-group">
+                            <input type="number" id="startNode" placeholder="Start node (0-based)" min="0" value="0">
+                            <button class="btn-secondary" onclick="startBFS()">🟦 BFS</button>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="startNode2" placeholder="Start node (0-based)" min="0" value="0">
+                            <button class="btn-secondary" onclick="startDFS()">🟥 DFS</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <button class="btn-info btn-small" onclick="toggleStepMode()">⏸️ Toggle Step Mode</button>
+                        <button class="btn-info btn-small" onclick="nextStep()">⏭️ Next Step</button>
+                        <button class="btn-danger btn-small" onclick="stopTraversal()">⏹️ Stop</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="status-box">
+                    <div class="status-label">📊 Nodes:</div>
+                    <div class="status-value" id="nodeCount">0</div>
+                    <div class="status-label" style="margin-top: 10px;">🔗 Edges:</div>
+                    <div class="status-value" id="edgeCount">0</div>
+                </div>
+
+                <div class="queue-stack">
+                    <h4 id="containerTitle">Queue/Stack</h4>
+                    <div id="queueStack"></div>
+                </div>
+
+                <div class="traversal-list">
+                    <h4>✓ Traversal Order</h4>
+                    <div id="traversalOrder"></div>
+                </div>
+
+                <div class="legend">
+                    <h4>Legend</h4>
+                    <div class="legend-item">
+                        <div class="legend-circle unvisited"></div>
+                        <span>Unvisited</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-circle current"></div>
+                        <span>Current</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-circle visited"></div>
+                        <span>Visited</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="code-section">
+            <h3>📝 Algorithm Implementation in C</h3>
+            <div class="algorithm-tabs">
+                <button class="tab-btn active" onclick="switchAlgorithm('bfs')">BFS Code</button>
+                <button class="tab-btn" onclick="switchAlgorithm('dfs')">DFS Code</button>
+            </div>
+
+            <div class="code-block bfs active">
+                <pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdbool.h&gt;
+
+#define MAX_NODES 100
+#define MAX_QUEUE 100
+
+// Queue structure for BFS
+typedef struct {
+    int items[MAX_QUEUE];
+    int front, rear;
+} Queue;
+
+void enqueue(Queue* q, int value) {
+    q-&gt;items[++q-&gt;rear] = value;
+}
+
+int dequeue(Queue* q) {
+    return q-&gt;items[q-&gt;front++];
+}
+
+bool isQueueEmpty(Queue* q) {
+    return q-&gt;front &gt; q-&gt;rear;
+}
+
+// BFS: Breadth-First Search
+void BFS(int adj[MAX_NODES][MAX_NODES], int startNode, int numNodes) {
+    bool visited[MAX_NODES] = {false};
+    Queue q;
+    q.front = 0;
+    q.rear = -1;
+
+    visited[startNode] = true;
+    enqueue(&q, startNode);
+
+    printf("BFS: ");
+    while (!isQueueEmpty(&q)) {
+        int node = dequeue(&q);
+        printf("%d ", node);  // Visit/process the node
+
+        // Check all neighbors
+        for (int i = 0; i &lt; numNodes; i++) {
+            if (adj[node][i] == 1 &amp;&amp; !visited[i]) {
+                visited[i] = true;
+                enqueue(&q, i);
+            }
+        }
+    }
+    printf("\n");
+}</pre>
+            </div>
+
+            <div class="code-block dfs">
+                <pre>#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdbool.h&gt;
+
+#define MAX_NODES 100
+
+// DFS: Depth-First Search (Recursive)
+void DFS(int adj[MAX_NODES][MAX_NODES], int node, bool visited[MAX_NODES], int numNodes) {
+    visited[node] = true;
+    printf("%d ", node);  // Visit/process the node
+
+    // Check all neighbors
+    for (int i = 0; i &lt; numNodes; i++) {
+        if (adj[node][i] == 1 &amp;&amp; !visited[i]) {
+            DFS(adj, i, visited, numNodes);
+        }
+    }
+}
+
+void DFSTraversal(int adj[MAX_NODES][MAX_NODES], int startNode, int numNodes) {
+    bool visited[MAX_NODES] = {false};
+    printf("DFS: ");
+    DFS(adj, startNode, visited, numNodes);
+    printf("\n");
+}
+
+// DFS: Iterative approach using Stack
+typedef struct {
+    int items[MAX_NODES];
+    int top;
+} Stack;
+
+void push(Stack* s, int value) {
+    s-&gt;items[++s-&gt;top] = value;
+}
+
+int pop(Stack* s) {
+    return s-&gt;items[s-&gt;top--];
+}
+
+bool isStackEmpty(Stack* s) {
+    return s-&gt;top == -1;
+}
+
+void DFSIterative(int adj[MAX_NODES][MAX_NODES], int startNode, int numNodes) {
+    bool visited[MAX_NODES] = {false};
+    Stack s;
+    s.top = -1;
+
+    visited[startNode] = true;
+    push(&s, startNode);
+
+    printf("DFS (Iterative): ");
+    while (!isStackEmpty(&s)) {
+        int node = pop(&s);
+        printf("%d ", node);
+
+        for (int i = 0; i &lt; numNodes; i++) {
+            if (adj[node][i] == 1 &amp;&amp; !visited[i]) {
+                visited[i] = true;
+                push(&s, i);
+            }
+        }
+    }
+    printf("\n");
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
